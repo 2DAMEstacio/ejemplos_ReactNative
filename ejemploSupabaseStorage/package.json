@@ -1,5 +1,5 @@
 {
-  "name": "ejemplosreactnative",
+  "name": "ejemplosupabasestorage",
   "version": "1.0.0",
   "main": "expo-router/entry",
   "scripts": {
@@ -43,7 +43,7 @@
     "typescript": "~5.9.2"
   },
   "private": true,
-  "scheme": "ejemplos-react-native",
+  "scheme": "ejemplos-supabase-storage",
   "web": {
     "bundler": "metro"
   }
