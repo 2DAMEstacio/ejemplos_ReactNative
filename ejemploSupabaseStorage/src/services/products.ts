@@ -1,6 +1,6 @@
-import { SUPABASE_STORAGE_BUCKET } from "../lib/env";
-import { supabase } from "../lib/supabase";
-import type { Product, ProductForm } from "../types/product";
+import { SUPABASE_STORAGE_BUCKET } from "@/lib/supabase";
+import { supabase } from "@/lib/supabase";
+import type { Product, ProductForm } from "@/types/product";
 
 export type ProductRow = {
   id: string;
@@ -76,10 +76,14 @@ export const updateProduct = async (
     })
     .eq("id", product.id)
     .select("id,name,description,price,images")
-    .single();
+    .maybeSingle();
 
   if (error) {
     throw new Error(error.message);
+  }
+
+  if (!data) {
+    throw new Error("Producto no encontrado.");
   }
 
   const row = data as ProductRow;

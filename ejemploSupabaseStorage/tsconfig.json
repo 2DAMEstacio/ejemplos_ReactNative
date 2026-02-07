@@ -1,9 +1,10 @@
 {
   "compilerOptions": {
     "jsx": "react",
+    "baseUrl": ".",
     "paths": {
       "@/*": [
-        "./*"
+        "./src/*"
       ],
       "tailwind.config": [
         "./tailwind.config.js"

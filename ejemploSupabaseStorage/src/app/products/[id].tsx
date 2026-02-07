@@ -15,9 +15,9 @@ import {
   Image,
 } from "react-native";
 
-import { useProduct } from "../../hooks/useProduct";
-import { useUpdateProduct } from "../../hooks/useUpdateProduct";
-import { resolveStorageUrl, uploadProductImage } from "../../services/storage";
+import { useProduct } from "@/hooks/useProduct";
+import { useUpdateProduct } from "@/hooks/useUpdateProduct";
+import { resolveStorageUrl, uploadProductImage } from "@/services/storage";
 
 export default function ProductEditScreen() {
   const router = useRouter();
@@ -54,10 +54,11 @@ export default function ProductEditScreen() {
     }
 
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: ['images', 'videos'],
       allowsMultipleSelection: true,
       quality: 0.8,
     });
+
 
     if (result.canceled) return;
 
@@ -111,6 +112,7 @@ export default function ProductEditScreen() {
       Alert.alert("Guardado", "Producto actualizado correctamente.");
       router.back();
     } catch (err) {
+      console.log(err);
       const message = err instanceof Error ? err.message : "Error al guardar.";
       Alert.alert("Error", message);
     }

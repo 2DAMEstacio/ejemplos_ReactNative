@@ -1,5 +1,5 @@
-import { SUPABASE_STORAGE_BUCKET } from "../lib/env";
-import { supabase } from "../lib/supabase";
+import { SUPABASE_STORAGE_BUCKET } from "@/lib/supabase";
+import { supabase } from "@/lib/supabase";
 
 export const resolveStorageUrl = (image: string) => {
   if (image.startsWith("http://") || image.startsWith("https://")) {
@@ -55,6 +55,7 @@ export const uploadProductImage = async (
     });
 
   if (error) {
+    console.log(error.message);
     throw new Error(error.message);
   }
 

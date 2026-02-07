@@ -1,8 +1,8 @@
 import React from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
-import type { Product } from "../types/product";
-import { ProductCarousel } from "./ProductCarousel";
+import type { Product } from "@/types/product";
+import { ProductCarousel } from "@/components/ProductCarousel";
 
 type Props = {
   product: Product;

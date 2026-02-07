@@ -3,7 +3,7 @@ import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import React from "react";
-import { ActivityIndicator } from "react-native";
+import { ActivityIndicator, View } from "react-native";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -22,9 +22,13 @@ export default function RootLayout() {
       }),
   );
 
-  if (!fontsLoaded) {
-    return <ActivityIndicator animating={true} />;
-  }
+  // if (!fontsLoaded) {
+  //   return (
+  //     <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+  //       <ActivityIndicator animating />
+  //     </View>
+  //   );
+  // }
   return (
     <QueryClientProvider client={queryClient}>
       <Stack>

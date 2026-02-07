@@ -14,26 +14,49 @@ type Props = {
 export const ProductCarousel = ({ images }: Props) => {
   const { width } = useWindowDimensions();
   const cardWidth = Math.min(420, width - 32);
-  const separatorWidth = 12;
   const [index, setIndex] = React.useState(0);
+  const listRef = React.useRef<FlatList<string>>(null);
+  const autoScrollDelay = 4000;
+
+  React.useEffect(() => {
+    if (images.length <= 1) return;
+    const timer = setInterval(() => {
+      setIndex((prev) => (prev + 1) % images.length);
+    }, autoScrollDelay);
+    return () => clearInterval(timer);
+  }, [images.length]);
+
+  React.useEffect(() => {
+    if (!listRef.current) return;
+    listRef.current.scrollToOffset({
+      offset: index * cardWidth,
+      animated: true,
+    });
+  }, [index, cardWidth]);
 
   return (
     <View>
       <FlatList
+        ref={listRef}
         data={images}
         keyExtractor={(item, i) => `${item}-${i}`}
         horizontal
         pagingEnabled
         showsHorizontalScrollIndicator={false}
-        snapToInterval={cardWidth + separatorWidth}
-        decelerationRate="fast"
+        snapToInterval={cardWidth}
+        decelerationRate="normal"
+        style={[styles.list, { width: cardWidth }]}
         onMomentumScrollEnd={(event) => {
           const nextIndex = Math.round(
-            event.nativeEvent.contentOffset.x / (cardWidth + separatorWidth),
+            event.nativeEvent.contentOffset.x / cardWidth,
           );
           setIndex(nextIndex);
         }}
-        ItemSeparatorComponent={() => <View style={{ width: separatorWidth }} />}
+        getItemLayout={(_, i) => ({
+          length: cardWidth,
+          offset: cardWidth * i,
+          index: i,
+        })}
         renderItem={({ item }) => (
           <Image
             source={{ uri: item }}
@@ -59,6 +82,9 @@ export const ProductCarousel = ({ images }: Props) => {
 };
 
 const styles = StyleSheet.create({
+  list: {
+    alignSelf: "center",
+  },
   image: {
     height: 220,
     borderRadius: 16,

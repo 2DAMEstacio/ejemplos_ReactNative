@@ -1,9 +1,10 @@
 import { Stack, useRouter } from "expo-router";
 import React from "react";
-import { ActivityIndicator, FlatList, StyleSheet, Text, View } from "react-native";
+import { FlatList, StyleSheet, Text, View } from "react-native";
 
-import { ProductCard } from "../components/ProductCard";
-import { useProducts } from "../hooks/useProducts";
+import { ProductCard } from "@/components/ProductCard";
+import { ProductsLoader } from "@/components/ProductsLoader";
+import { useProducts } from "@/hooks/useProducts";
 
 export default function Home() {
   const router = useRouter();
@@ -18,7 +19,7 @@ export default function Home() {
         }}
       />
       {isLoading ? (
-        <ActivityIndicator size="large" />
+        <ProductsLoader />
       ) : isError ? (
         <View style={styles.message}>
           <Text style={styles.messageTitle}>No se pudo cargar.</Text>
