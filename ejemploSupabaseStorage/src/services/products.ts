@@ -95,3 +95,11 @@ export const updateProduct = async (
     images: row.images ?? [],
   };
 };
+
+export const deleteProduct = async (id: string): Promise<void> => {
+  const { error } = await supabase.from("products").delete().eq("id", id);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+};

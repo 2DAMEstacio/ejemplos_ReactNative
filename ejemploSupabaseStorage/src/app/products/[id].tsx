@@ -15,6 +15,7 @@ import {
   Image,
 } from "react-native";
 
+import { useDeleteProduct } from "@/hooks/useDeleteProduct";
 import { useProduct } from "@/hooks/useProduct";
 import { useUpdateProduct } from "@/hooks/useUpdateProduct";
 import { resolveStorageUrl, uploadProductImage } from "@/services/storage";
@@ -24,6 +25,7 @@ export default function ProductEditScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { data, isLoading, isError, error } = useProduct(id ?? "");
   const updateMutation = useUpdateProduct();
+  const deleteMutation = useDeleteProduct();
 
   const [name, setName] = React.useState("");
   const [description, setDescription] = React.useState("");
@@ -116,6 +118,30 @@ export default function ProductEditScreen() {
       const message = err instanceof Error ? err.message : "Error al guardar.";
       Alert.alert("Error", message);
     }
+  };
+
+  const handleDelete = () => {
+    if (!data?.id) {
+      return;
+    }
+    Alert.alert("Eliminar producto", "¿Seguro que quieres eliminarlo?", [
+      { text: "Cancelar", style: "cancel" },
+      {
+        text: "Eliminar",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            await deleteMutation.mutateAsync(data.id);
+            Alert.alert("Eliminado", "Producto eliminado.");
+            router.back();
+          } catch (err) {
+            const message =
+              err instanceof Error ? err.message : "Error al eliminar.";
+            Alert.alert("Error", message);
+          }
+        },
+      },
+    ]);
   };
 
   if (isLoading) {
@@ -227,6 +253,20 @@ export default function ProductEditScreen() {
         >
           <Text style={styles.buttonText}>
             {updateMutation.isPending ? "Guardando..." : "Guardar cambios"}
+          </Text>
+        </Pressable>
+
+        <Pressable
+          onPress={handleDelete}
+          disabled={deleteMutation.isPending}
+          style={({ pressed }) => [
+            styles.deleteButton,
+            pressed ? styles.buttonPressed : null,
+            deleteMutation.isPending ? styles.buttonDisabled : null,
+          ]}
+        >
+          <Text style={styles.deleteButtonText}>
+            {deleteMutation.isPending ? "Eliminando..." : "Eliminar producto"}
           </Text>
         </Pressable>
       </ScrollView>
@@ -347,6 +387,16 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: "#ffffff",
+    fontWeight: "600",
+  },
+  deleteButton: {
+    backgroundColor: "#fee2e2",
+    paddingVertical: 12,
+    borderRadius: 12,
+    alignItems: "center",
+  },
+  deleteButtonText: {
+    color: "#b91c1c",
     fontWeight: "600",
   },
 });
