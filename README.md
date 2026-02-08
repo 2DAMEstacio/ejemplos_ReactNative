@@ -79,4 +79,3 @@ Notas:
 - Productos y Storage: `ejemploSupabaseStorage/src/services/products.ts`, `ejemploSupabaseStorage/src/services/storage.ts`.
 - Rutas y pantallas: `ejemploSupabaseStorage/src/app`.
 
-Si quieres, puedo añadir capturas, instrucciones para EAS builds o un apartado de troubleshooting.
