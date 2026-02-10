@@ -1,11 +1,12 @@
 # Ejemplos React Native (Expo)
 
-Repositorio con dos ejemplos prácticos de Expo + React Native. Cada carpeta es un proyecto independiente con su propio `package.json` y configuración.
+Repositorio con tres ejemplos prácticos de Expo + React Native. Cada carpeta es un proyecto independiente con su propio `package.json` y configuración.
 
 **Estructura**
 
 - `ejemploNotificacionesPush`: autenticación con Supabase + registro de token y envío de notificaciones push con Expo.
 - `ejemploSupabaseStorage`: catálogo de productos con imágenes alojadas en Supabase Storage.
+- `ejemploMaps`: login con Supabase Auth + búsqueda de direcciones en mapa (OpenStreetMap/Nominatim + tiles).
 
 **Requisitos**
 
@@ -72,10 +73,40 @@ Notas:
 - La pantalla de edición permite subir múltiples imágenes usando `expo-image-picker`.
 - Las imágenes que no sean URLs completas se resuelven como públicas en el bucket configurado.
 
+**Ejemplo 3: Buscador de direcciones en mapa**
+
+Lo que hace el proyecto:
+
+- Login/registro con Supabase Auth.
+- Búsqueda de direcciones con Nominatim (OpenStreetMap).
+- Muestra el resultado en un mapa con marcador.
+
+Configuración rápida:
+
+1. Crea un archivo `.env` en `ejemploMaps` con:
+   - `EXPO_PUBLIC_SUPABASE_URL`
+   - `EXPO_PUBLIC_SUPABASE_ANON_KEY`
+   - `EXPO_PUBLIC_TILE_KEY` (clave de MapTiler para cargar tiles)
+   - `EXPO_PUBLIC_TILE_URL_WEB` (opcional, URL personalizada para web)
+2. Inicia el proyecto:
+
+```bash
+cd ejemploMaps
+npm install
+npx expo start
+```
+
+Notas:
+
+- En web se renderiza el mapa con Leaflet; en nativo se usa `react-native-maps`.
+- Nominatim tiene límites de uso; para producción conviene usar un proveedor propio o cachear resultados.
+
 **Dónde mirar el código**
 
 - Supabase Auth y push: `ejemploNotificacionesPush/hooks/use-auth.ts`, `ejemploNotificacionesPush/hooks/use-push-notifications.ts`.
 - UI y navegación push: `ejemploNotificacionesPush/app/login.tsx`, `ejemploNotificacionesPush/app/notifications.tsx`.
 - Productos y Storage: `ejemploSupabaseStorage/src/services/products.ts`, `ejemploSupabaseStorage/src/services/storage.ts`.
 - Rutas y pantallas: `ejemploSupabaseStorage/src/app`.
-
+- Mapas y búsqueda: `ejemploMaps/app/map.tsx`, `ejemploMaps/hooks/use-map-screen.ts`.
+- Login maps: `ejemploMaps/app/login.tsx`, `ejemploMaps/hooks/use-auth.ts`.
+- Renderizado del mapa: `ejemploMaps/components/address-map.native.tsx`, `ejemploMaps/components/address-map.web.tsx`.
