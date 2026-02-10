@@ -4,6 +4,7 @@ import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
 import Constants from 'expo-constants';
 
+import { EXPO_PUSH_API_URL } from '@/lib/constants';
 import { supabase } from '@/lib/supabase';
 
 
@@ -21,41 +22,23 @@ type PushTokenRow = {
   token: string;
 };
 
-export function usePushNotifications() {
-  const [sessionUserId, setSessionUserId] = useState<string | null>(null);
+type UsePushNotificationsOptions = {
+  userId?: string | null;
+};
+
+export function usePushNotifications(options: UsePushNotificationsOptions = {}) {
+  const { userId } = options;
   const [pushToken, setPushToken] = useState<string | null>(null);
   const [registering, setRegistering] = useState(false);
   const [sending, setSending] = useState(false);
   const [lastNotification, setLastNotification] = useState<string | null>(null);
-  const [authChecked, setAuthChecked] = useState(false);
 
   const projectId = useMemo(() => {
     return Constants.easConfig?.projectId ?? Constants.expoConfig?.extra?.eas?.projectId ?? undefined;
   }, []);
 
-  // Sincroniza la sesión y escucha notificaciones entrantes.
+  // Escucha notificaciones entrantes.
   useEffect(() => {
-    let active = true;
-
-    supabase.auth.getSession().then(({ data }) => {
-      if (!active) return;
-      if (data.session) {
-        setSessionUserId(data.session.user.id);
-      } else {
-        setSessionUserId(null);
-      }
-      setAuthChecked(true);
-    });
-
-    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (!session) {
-        setSessionUserId(null);
-      } else {
-        setSessionUserId(session.user.id);
-      }
-      setAuthChecked(true);
-    });
-
     // En web los listeners de Expo no tienen efecto; evitamos registrarlos.
     const notificationSub =
       Platform.OS === 'web'
@@ -67,19 +50,31 @@ export function usePushNotifications() {
         });
 
     return () => {
-      active = false;
-      authListener.subscription.unsubscribe();
       notificationSub?.remove();
     };
+  }, []);
+
+  useEffect(() => {
+    if (Platform.OS === 'web') return;
+
+    const responseSub =
+      Notifications.addNotificationResponseReceivedListener((response) => {
+        // Captura la data extra cuando el usuario interactua con la notificacion.
+        const data = response.notification.request.content.data;
+        console.log('Usuario interactuó con notificación. Data:', data);
+      });
+
+    // Limpia el listener al desmontar para evitar duplicados.
+    return () => responseSub.remove();
   }, []);
 
   // Registra el token push cuando hay un usuario autenticado.
   useEffect(() => {
     if (Platform.OS === 'web') return;
-    if (!sessionUserId) return;
+    if (!userId) return;
     registerForPush();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sessionUserId]);
+  }, [userId]);
 
   // Solicita permisos, obtiene el token de Expo y lo guarda en Supabase.
   const registerForPush = async () => {
@@ -121,13 +116,13 @@ export function usePushNotifications() {
       setPushToken(tokenResponse.data);
 
       // Guardamos/actualizamos el token en Supabase para futuros envíos.
-      if (sessionUserId) {
+      if (userId) {
         const { error } = await supabase
           .from('push_tokens')
           .upsert(
             {
               token: tokenResponse.data,
-              user_id: sessionUserId,
+              user_id: userId,
               device_name: Device.deviceName ?? 'unknown',
             },
             { onConflict: 'token' },
@@ -177,7 +172,7 @@ export function usePushNotifications() {
           body: message.trim(),
         }));
 
-        const response = await fetch('https://exp.host/--/api/v2/push/send', {
+        const response = await fetch(EXPO_PUSH_API_URL, {
           method: 'POST',
           headers: {
             Accept: 'application/json',
@@ -202,19 +197,12 @@ export function usePushNotifications() {
     }
   };
 
-  const signOut = async () => {
-    await supabase.auth.signOut();
-  };
-
   return {
-    authChecked,
-    sessionUserId,
     pushToken,
     registering,
     sending,
     lastNotification,
     sendNotification,
-    signOut,
   };
 }
 

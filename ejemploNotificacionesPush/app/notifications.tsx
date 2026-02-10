@@ -3,20 +3,14 @@ import { ActivityIndicator, StyleSheet, Text, TextInput, TouchableOpacity, View 
 import { useRouter } from 'expo-router';
 
 import { usePushNotifications } from '@/hooks/use-push-notifications';
+import { useAuth } from '@/hooks/use-auth';
 
 export default function NotificationsScreen() {
   const router = useRouter();
   const [message, setMessage] = useState('');
-  const {
-    authChecked,
-    sessionUserId,
-    pushToken,
-    registering,
-    sending,
-    lastNotification,
-    sendNotification,
-    signOut,
-  } = usePushNotifications();
+  const { authChecked, sessionUserId, signOut } = useAuth();
+  const { pushToken, registering, sending, lastNotification, sendNotification } =
+    usePushNotifications({ userId: sessionUserId });
 
   useEffect(() => {
     if (authChecked && !sessionUserId) {
