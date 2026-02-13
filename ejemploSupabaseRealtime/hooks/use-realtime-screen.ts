@@ -41,6 +41,28 @@ export function useRealtimeScreen() {
   });
 
   useEffect(() => {
+    // Mantiene el JWT de Realtime alineado con la sesión actual.
+    // Es importante cuando hay login reciente o refresh de token.
+    void supabase.auth.getSession().then(({ data }) => {
+      const token = data.session?.access_token;
+      if (token) {
+        supabase.realtime.setAuth(token);
+      }
+    });
+
+    const { data: authSubscription } = supabase.auth.onAuthStateChange((_event, session) => {
+      const token = session?.access_token;
+      if (token) {
+        supabase.realtime.setAuth(token);
+      }
+    });
+
+    return () => {
+      authSubscription.subscription.unsubscribe();
+    };
+  }, []);
+
+  useEffect(() => {
     // Sin usuario autenticado no abrimos canal Realtime, porque esta pantalla
     // depende de datos protegidos y del contexto de sesión actual.
     if (!sessionUserId) {
