@@ -1,12 +1,13 @@
 # Ejemplos React Native (Expo)
 
-Repositorio con tres ejemplos prácticos de Expo + React Native. Cada carpeta es un proyecto independiente con su propio `package.json` y configuración.
+Repositorio con cuatro ejemplos prácticos de Expo + React Native. Cada carpeta es un proyecto independiente con su propio `package.json` y configuración.
 
 **Estructura**
 
 - `ejemploNotificacionesPush`: autenticación con Supabase + registro de token y envío de notificaciones push con Expo.
 - `ejemploSupabaseStorage`: catálogo de productos con imágenes alojadas en Supabase Storage.
 - `ejemploMaps`: login con Supabase Auth + búsqueda de direcciones en mapa (OpenStreetMap/Nominatim + tiles).
+- `ejemploSupabaseRealtime`: preguntas y respuestas en tiempo real con Supabase Realtime (`postgres_changes`).
 
 **Requisitos**
 
@@ -101,6 +102,36 @@ Notas:
 - En web se renderiza el mapa con Leaflet; en nativo se usa `react-native-maps`.
 - Nominatim tiene límites de uso; para producción conviene usar un proveedor propio o cachear resultados.
 
+**Ejemplo 4: Supabase Realtime (Q&A en vivo)**
+
+Lo que hace el proyecto:
+
+- Login/registro con Supabase Auth.
+- Publicación de preguntas por tema en la tabla `live_questions`.
+- Votación y marcado de preguntas como respondidas.
+- Sincronización instantánea del feed con Supabase Realtime (eventos `INSERT/UPDATE/DELETE`).
+
+Configuración rápida:
+
+1. En Supabase, ejecuta el SQL de `ejemploSupabaseRealtime/supabase/live_questions.sql`.
+2. En Supabase > Database > Replication, verifica que la tabla `live_questions` esté incluida en la publicación de Realtime (`supabase_realtime`).
+3. Crea un archivo `.env` en `ejemploSupabaseRealtime` con:
+   - `EXPO_PUBLIC_SUPABASE_URL`
+   - `EXPO_PUBLIC_SUPABASE_ANON_KEY`
+4. Inicia el proyecto:
+
+```bash
+cd ejemploSupabaseRealtime
+npm install
+npx expo start
+```
+
+Notas:
+
+- El canal de Realtime se suscribe a `postgres_changes` sobre `public.live_questions`.
+- El estado del canal se muestra en UI para diagnosticar conexión (`CONNECTING`, `SUBSCRIBED`, etc.).
+- El ejemplo incluye reconexión con backoff exponencial y resincronización del feed tras reconectar.
+
 **Dónde mirar el código**
 
 - Supabase Auth y push: `ejemploNotificacionesPush/hooks/use-auth.ts`, `ejemploNotificacionesPush/hooks/use-push-notifications.ts`.
@@ -110,3 +141,5 @@ Notas:
 - Mapas y búsqueda: `ejemploMaps/app/map.tsx`, `ejemploMaps/hooks/use-map-screen.ts`.
 - Login maps: `ejemploMaps/app/login.tsx`, `ejemploMaps/hooks/use-auth.ts`.
 - Renderizado del mapa: `ejemploMaps/components/address-map.native.tsx`, `ejemploMaps/components/address-map.web.tsx`.
+- Realtime (pantalla y suscripción): `ejemploSupabaseRealtime/app/realtime.tsx`, `ejemploSupabaseRealtime/hooks/use-realtime-screen.ts`.
+- Realtime (servicio + SQL): `ejemploSupabaseRealtime/services/live-questions.service.ts`, `ejemploSupabaseRealtime/supabase/live_questions.sql`.
